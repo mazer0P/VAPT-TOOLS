@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clickjacking Test</title>
+    <style>
+        iframe {
+            width: 800px;
+            height: 600px;
+            border: 5px solid red;
+            position: relative;
+            opacity: 0.8;
+        }
+
+        h1 {
+            color: red;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Clickjacking Test</h1>
+    <p>
+        Below is an <strong>iframe</strong> attempting to load your website. 
+        If your website appears inside the iframe, it is vulnerable to clickjacking.
+    </p>
+
+    <script>
+        // Ask the user for their website URL
+        const userWebsite = prompt("Please enter your website URL:");
+
+        // Validate the URL
+        if (userWebsite) {
+            // Create the iframe element dynamically
+            const iframe = document.createElement("iframe");
+            iframe.src = userWebsite;
+            iframe.sandbox = "allow-scripts allow-same-origin"; // Restrict the iframe's capabilities
+
+            // Add the iframe to the body
+            document.body.appendChild(iframe);
+        } else {
+            // If the user did not provide a URL, show an alert
+            alert("You must enter a website URL.");
+        }
+    </script>
+</body>
+</html>
