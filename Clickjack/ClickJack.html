@@ -3,45 +3,228 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clickjacking Test</title>
+    <title>Clickjacking Test By Paras</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
     <style>
-        iframe {
-            width: 800px;
-            height: 600px;
-            border: 5px solid red;
-            position: relative;
-            opacity: 0.8;
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+            text-align: center;
         }
 
         h1 {
-            color: red;
+            color: #ff5722;
+            margin-bottom: 20px;
+            font-size: 3rem;
+            font-weight: 700;
+        }
+
+        p {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            max-width: 80%;
+            color: #555;
+        }
+
+        .container {
+            max-width: 1000px;
+            padding: 30px;
+            background-color: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
             text-align: center;
+            width: 100%;  /* Make sure the container takes full width */
+        }
+
+        .input-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        input[type="url"] {
+            padding: 12px 20px;
+            font-size: 1.2rem;
+            width: 70%;
+            max-width: 600px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        input[type="url"]:focus {
+            border-color: #ff5722;
+            box-shadow: 0 0 10px rgba(255, 87, 34, 0.5);
+            outline: none;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+        }
+
+        button {
+            padding: 12px 25px;
+            font-size: 1.2rem;
+            background: linear-gradient(90deg, #ff5722, #f44336);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        button:hover {
+            background: linear-gradient(90deg, #f44336, #ff5722);
+            transform: scale(1.05);
+        }
+
+        button i {
+            margin-right: 8px;
+        }
+
+        #status {
+            font-size: 1.5em;
+            margin-top: 20px;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        #status.vulnerable {
+            color: #e53935;
+        }
+
+        #status.protected {
+            color: #43a047;
+        }
+
+        iframe {
+            width: 80%;
+            height: 500px;
+            border: 3px solid #ff5722;
+            margin-top: 30px;
+            opacity: 0.8;
+            border-radius: 10px;
+        }
+
+        .footer {
+            margin-top: 30px;
+        }
+
+        .footer a {
+            font-size: 1.2rem;
+            color: #555;
+            text-decoration: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: color 0.3s ease;
+        }
+
+        .footer a:hover {
+            color: #ff5722;
+        }
+
+        .footer i {
+            margin-right: 8px;
+        }
+
+        @media (max-width: 768px) {
+            input[type="url"] {
+                width: 90%;
+            }
+
+            button {
+                width: 90%;
+            }
+
+            iframe {
+                width: 90%;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>Clickjacking Test</h1>
-    <p>
-        Below is an <strong>iframe</strong> attempting to load your website. 
-        If your website appears inside the iframe, it is vulnerable to clickjacking.
-    </p>
+    <div class="container">
+        <h1>Clickjacking Test</h1>
+        <p>
+            Enter your website URL below to check if it's vulnerable to clickjacking. 
+            If the site loads inside the iframe, it could be vulnerable.
+        </p>
+
+        <!-- Input container with flex for centering -->
+        <div class="input-container">
+            <input type="url" id="websiteURL" placeholder="Enter your website URL" required>
+        </div>
+
+        <!-- Button container with flex for centering -->
+        <div class="button-container">
+            <button onclick="runClickjackingTest()">
+                <i class="fas fa-search"></i> Test Website
+            </button>
+        </div>
+
+        <div id="status"></div>
+
+        <div id="iframeContainer"></div>
+    </div>
+
+    <div class="footer">
+        <a href="https://github.com/mazer0P" target="_blank">
+            <i class="fab fa-github"></i> Visit my GitHub
+        </a>
+    </div>
 
     <script>
-        // Ask the user for their website URL
-        const userWebsite = prompt("Please enter your website URL:");
+        function runClickjackingTest() {
+            const websiteURL = document.getElementById("websiteURL").value;
+            const statusDiv = document.getElementById("status");
+            const iframeContainer = document.getElementById("iframeContainer");
 
-        // Validate the URL
-        if (userWebsite) {
-            // Create the iframe element dynamically
-            const iframe = document.createElement("iframe");
-            iframe.src = userWebsite;
-            iframe.sandbox = "allow-scripts allow-same-origin"; // Restrict the iframe's capabilities
+            // Clear previous results
+            iframeContainer.innerHTML = '';
+            statusDiv.textContent = '';
+            statusDiv.style.opacity = 0;
 
-            // Add the iframe to the body
-            document.body.appendChild(iframe);
-        } else {
-            // If the user did not provide a URL, show an alert
-            alert("You must enter a website URL.");
+            if (websiteURL) {
+                // Create an iframe dynamically
+                const iframe = document.createElement("iframe");
+                iframe.src = websiteURL;
+                iframe.sandbox = "allow-scripts allow-same-origin"; // Restrict iframe's capabilities
+                iframeContainer.appendChild(iframe);
+
+                // Check if the website is protected or not
+                iframe.onload = function() {
+                    statusDiv.textContent = "Your website is vulnerable to clickjacking. It loads successfully inside an iframe.";
+                    statusDiv.className = "vulnerable";
+                    statusDiv.style.opacity = 1;
+                };
+
+                iframe.onerror = function() {
+                    statusDiv.textContent = "Your website is protected from clickjacking! It could not be loaded inside the iframe.";
+                    statusDiv.className = "protected";
+                    statusDiv.style.opacity = 1;
+                };
+            } else {
+                alert("Please enter a valid website URL.");
+            }
         }
     </script>
 </body>
