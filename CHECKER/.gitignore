@@ -1,0 +1,13 @@
+# Ignore virtual environment directory (Poetry's environment)
+.venv/
+
+# Ignore Python bytecode
+*.pyc
+*.pyo
+*.pyd
+
+# Ignore Poetry lock file and build artifacts
+poetry.lock
+dist/
+build/
+*.egg-info/
