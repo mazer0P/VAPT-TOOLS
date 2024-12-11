@@ -1,5 +1,6 @@
 #!/bin/python3
 import argparse
+import os
 import socket
 import ssl
 import subprocess
@@ -163,12 +164,11 @@ def run_subfinder(t):
 
 
 # Run ffuf for directory brute-forcing
-def run_ffuf(t):
+def run_ffuf(t, w):
     print(f"\n[+] Running ffuf for directory brute-forcing on {t}")
     try:
-        wordlist = "/home/kali/tools/SecLists/Discovery/Web-Content/big.txt"  # Specify the correct wordlist path
         result = subprocess.run(
-            ["ffuf", "-u", f"{t}FUZZ", "-w", wordlist, "-mc", "200", "-t", "50"],
+            ["ffuf", "-u", f"{t}FUZZ", "-w", w, "-mc", "200", "-t", "50"],
             text=True, capture_output=True
         )
         print("\n%%%%%%%%%%%%%%%%%%%%%%%%FFUF RESULTS%%%%%%%%%%%%%%%%%%%%%%%%%%%\n" + result.stdout)
@@ -196,6 +196,15 @@ def run_nikto_advanced(t):
         print(f"Error with advanced Nikto scan: {e}")
 
 
+def run_ssl_scan(t):
+    print(f"\n[+] Running ssl-scan on {t}")
+    try:
+        result = subprocess.run(["sslscan", t], text=True, capture_output=True)
+        print("\n%%%%%%%%%%%%%%%%%%%%%%%%-SSL-SCAN RESULTS-%%%%%%%%%%%%%%%%%%%%%%%%%%%\n" + result.stdout)
+    except Exception as e:
+        print(f"Error with SSL-SCAN:{e}")
+
+
 # Level 1: Basic Info Gathering
 def run_level_1(t, ip):
     print("\nRunning Level 1: Basic Information Gathering")
@@ -216,7 +225,7 @@ def run_level_2(t, ip):
 
 
 # Level 3: Comprehensive Scanning (Runs all tools)
-def run_level_3(t, ip, d):
+def run_level_3(t, ip, d, w):
     print("\nRunning Level 3: Comprehensive Scanning")
     with ThreadPoolExecutor() as executor:
         executor.submit(run_curl, t)
@@ -225,12 +234,12 @@ def run_level_3(t, ip, d):
         executor.submit(get_http_headers, t)
         executor.submit(get_ssl_info, ip)
         executor.submit(get_ip_geolocation, ip)
-        # executor.submit(run_nmap, t)
         # executor.submit(run_nikto, t)
         executor.submit(run_subfinder, d)
-        executor.submit(run_ffuf, t)
+        executor.submit(run_ffuf, t, w)
         executor.submit(run_nmap_advanced, ip)
         executor.submit(run_nikto_advanced, t)
+        executor.submit(run_ssl_scan, t)
 
 
 # Main logic
@@ -239,15 +248,16 @@ def main():
     parser = argparse.ArgumentParser(description="Run a set of tools for network reconnaissance and scanning.")
     parser.add_argument("-url", type=str, required=True, help="Target URL (including http:// or https://)")
     parser.add_argument("-level", type=int, required=True, choices=[1, 2, 3], help="Scan level (1, 2, or 3)")
-
+    parser.add_argument('-w', '--wordlist', type=str, default="/home/kali/tools/SecLists/Discovery/Web-Content/big.txt",
+                        help="Path to the wordlist (default: /home/kali/tools/SecLists/Discovery/Web-Content/big.txt)")
     args = parser.parse_args()
 
     target = args.url
     level = str(args.level)
-    # Specify the wordlist path
-    wordlist = "/home/kali/tools/SecLists/Discovery/Web-Content/big.txt"  # Update to your wordlist path
-    if not wordlist:
-        print("[-] Wordlist is missing or invalid. Please provide a valid wordlist.")
+    wordlist = args.wordlist  # Specify the wordlist path
+
+    if not os.path.isfile(wordlist):
+        print(colored(f"[ERROR] The specified wordlist path does not exist: {wordlist}", 'red'))
         sys.exit(1)
     print_colored_logo()
     print("WELCOME DADDY, Started scanning on: " + target + "\n")
@@ -257,6 +267,7 @@ def main():
     print(f"Level assigned: {level}")
     print(f"Domain: {domain}")
     print(f"Found IP: {ip}")
+    print(f"Using wordlist: {wordlist}")
     if not target.startswith("http://") and not target.startswith("https://"):
         print(colored("[ERROR] The URL must start with 'http://' or 'https://'.", 'red'))
     else:
@@ -266,7 +277,7 @@ def main():
         elif level == "2":
             run_level_2(target, ip)
         elif level == "3":
-            run_level_3(target, ip, domain)
+            run_level_3(target, ip, domain, wordlist)
         else:
             print("Invalid level. Please choose level 1, 2, or 3.")
             sys.exit(1)
