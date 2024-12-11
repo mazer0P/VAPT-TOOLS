@@ -1,6 +1,6 @@
-import requests
 import re
-from urllib.parse import urljoin
+
+import requests
 from termcolor import colored  # Import termcolor for colored output
 
 
@@ -135,14 +135,3 @@ def run_owasp_tests(url):
     check_http_security_headers(url)
     check_website_components_version(url)
     check_cookie_security(url)
-
-
-if __name__ == "__main__":
-    # Get the target URL from the user
-    target_url = input("Please enter the URL of the web application to test (e.g., http://example.com): ")
-
-    # Ensure the URL starts with http or https
-    if not target_url.startswith("http://") and not target_url.startswith("https://"):
-        print(colored("[ERROR] The URL must start with 'http://' or 'https://'.", 'red'))
-    else:
-        run_owasp_tests(target_url)

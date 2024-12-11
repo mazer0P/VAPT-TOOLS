@@ -1,5 +1,5 @@
 #!/bin/python3
-
+import argparse
 import socket
 import ssl
 import subprocess
@@ -11,7 +11,7 @@ import pyfiglet
 import requests
 from termcolor import colored
 
-import checklist as oc
+from . import checklist as oc
 
 
 # Colored logo
@@ -234,31 +234,33 @@ def run_level_3(t, ip, d):
 
 
 # Main logic
-if __name__ == "__main__":
-    if len(sys.argv) == 3:
-        target = sys.argv[1]
-        level = sys.argv[2]
-        if not target.endswith('/'):
-            target += '/'
+def main():
+    # Argument parsing
+    parser = argparse.ArgumentParser(description="Run a set of tools for network reconnaissance and scanning.")
+    parser.add_argument("-url", type=str, required=True, help="Target URL (including http:// or https://)")
+    parser.add_argument("-level", type=int, required=True, choices=[1, 2, 3], help="Scan level (1, 2, or 3)")
 
-            # Specify the wordlist path
-        wordlist = "/home/kali/tools/SecLists/Discovery/Web-Content/big.txt"  # Update to your wordlist path
-        if not wordlist:
-            print("[-] Wordlist is missing or invalid. Please provide a valid wordlist.")
-            sys.exit(1)
-        print_colored_logo()
-        print("WELCOME DADDY, Started scanning on: " + target + "\n")
-        ip = get_ip_from_url(target)
-        domain = remove_https(target)
-        print(f"Target: {target}")
-        print(f"Level assigned: {level}")
-        print(f"Domain: {domain}")
-        print(f"Found IP: {ip}")
-        if not target.startswith("http://") and not target.startswith("https://"):
-            print(colored("[ERROR] The URL must start with 'http://' or 'https://'.", 'red'))
-        else:
-            oc.run_owasp_tests(target)
+    args = parser.parse_args()
 
+    target = args.url
+    level = str(args.level)
+    # Specify the wordlist path
+    wordlist = "/home/kali/tools/SecLists/Discovery/Web-Content/big.txt"  # Update to your wordlist path
+    if not wordlist:
+        print("[-] Wordlist is missing or invalid. Please provide a valid wordlist.")
+        sys.exit(1)
+    print_colored_logo()
+    print("WELCOME DADDY, Started scanning on: " + target + "\n")
+    ip = get_ip_from_url(target)
+    domain = remove_https(target)
+    print(f"Target: {target}")
+    print(f"Level assigned: {level}")
+    print(f"Domain: {domain}")
+    print(f"Found IP: {ip}")
+    if not target.startswith("http://") and not target.startswith("https://"):
+        print(colored("[ERROR] The URL must start with 'http://' or 'https://'.", 'red'))
+    else:
+        oc.run_owasp_tests(target)
         if level == "1":
             run_level_1(target, ip)
         elif level == "2":
@@ -268,9 +270,7 @@ if __name__ == "__main__":
         else:
             print("Invalid level. Please choose level 1, 2, or 3.")
             sys.exit(1)
-    else:
-        print("Host is down. Aborting the scan.")
-        sys.exit(1)
-else:
-    print("Usage: python3 checker.py <url> <level>")
-    sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()
