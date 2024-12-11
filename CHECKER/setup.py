@@ -12,7 +12,7 @@ setup(
     ],
     entry_points={                  # Create command-line entry point
         'console_scripts': [
-            'checker = checker.checker:run_checker',  # Call `run_checker` from checker.py
+            'checker = checker.checker:main',  # Call `run_checker` from checker.py
         ],
     },
 )
