@@ -11,7 +11,7 @@ import pyfiglet
 import requests
 from termcolor import colored
 
-import checker.checklist as oc
+import checklist as oc
 
 
 # Colored logo
