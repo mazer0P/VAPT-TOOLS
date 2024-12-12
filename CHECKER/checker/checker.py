@@ -13,6 +13,7 @@ import requests
 from termcolor import colored
 
 from . import checklist as oc
+from . import logincrawler as lc
 
 
 # Colored logo
@@ -96,8 +97,9 @@ def get_ip_geolocation(ip):
         if data['status'] == 'fail':
             print("Could not retrieve geolocation data.")
         else:
+            func_name = "GEO-LOCATION"
             print(
-                f"\n%%%%%%%%%%%%%%%%%%%%%%%%GEOLOCATION RESULTS%%%%%%%%%%%%%%%%%%%%%%%%%%%\nLocation: {data['city']}, {data['regionName']}, {data['country']}")
+                f"{identifier(func_name)}Location: {data['city']}, {data['regionName']}, {data['country']}")
             print(f"ISP: {data['isp']}")
     except Exception as e:
         print(f"Error with IP geolocation: {e}")
@@ -108,7 +110,8 @@ def run_curl(t):
     print(f"\n[+] Running curl on {t}")
     try:
         result = subprocess.run(["curl", "-I", t], text=True, capture_output=True)
-        print("\n%%%%%%%%%%%%%%%%%%%%%%%%CURL RESULTS%%%%%%%%%%%%%%%%%%%%%%%%%%%\n" + result.stdout)
+        func_name = "CURL"
+        print(f"{identifier(func_name)}" + result.stdout)
     except Exception as e:
         print(f"Error with curl: {e}")
 
@@ -118,7 +121,8 @@ def run_whois(t):
     print(f"\n[+] Running whois on {t}")
     try:
         result = subprocess.run(["whois", t], text=True, capture_output=True)
-        print("\n%%%%%%%%%%%%%%%%%%%%%%%%WHOIS RESULTS%%%%%%%%%%%%%%%%%%%%%%%%%%%\n" + result.stdout)
+        func_name = "WHO-IS"
+        print(f"{identifier(func_name)}" + result.stdout)
     except Exception as e:
         print(f"Error with whois: {e}")
 
@@ -128,7 +132,8 @@ def run_nslookup(t):
     print(f"\n[+] Running nslookup on {t}")
     try:
         result = subprocess.run(["nslookup", t], text=True, capture_output=True)
-        print("\n%%%%%%%%%%%%%%%%%%%%%%%%NS-LOOKUP RESULTS%%%%%%%%%%%%%%%%%%%%%%%%%%%\n" + result.stdout)
+        func_name = "NS-LOOKUP"
+        print(f"{identifier(func_name)}" + result.stdout)
     except Exception as e:
         print(f"Error with nslookup: {e}")
 
@@ -138,7 +143,8 @@ def run_nmap(t):
     print(f"\n[+] Running nmap scan on {t}")
     try:
         result = subprocess.run(["nmap", "-T4", t], text=True, capture_output=True)
-        print("\n%%%%%%%%%%%%%%%%%%%%%%%%NMAP RESULTS%%%%%%%%%%%%%%%%%%%%%%%%%%%\n" + result.stdout)
+        func_name = "BASIC-NMAP"
+        print(f"{identifier(func_name)}" + result.stdout)
     except Exception as e:
         print(f"Error with nmap: {e}")
 
@@ -148,7 +154,8 @@ def run_nikto(t):
     print(f"\n[+] Running Nikto scan on {t}")
     try:
         result = subprocess.run(["nikto", "-h", t], text=True, capture_output=True)
-        print("\n%%%%%%%%%%%%%%%%%%%%%%%%-NiKTO RESULTS-%%%%%%%%%%%%%%%%%%%%%%%%%%%\n" + result.stdout)
+        func_name = "NIKTO"
+        print(f"{identifier(func_name)}" + result.stdout)
     except Exception as e:
         print(f"Error with Nikto: {e}")
 
@@ -158,7 +165,9 @@ def run_subfinder(t):
     print(f"\n[+] Running Subfinder for subdomain enumeration on {t}")
     try:
         result = subprocess.run(["subfinder", "-d", t], text=True, capture_output=True)
-        print("\n%%%%%%%%%%%%%%%%%%%%%%%%-SUBFINDER RESULTS-%%%%%%%%%%%%%%%%%%%%%%%%%%%\n" + result.stdout)
+        func_name = "SUBFINDER"
+        text = identifier(func_name)
+        print(f"{text}" + result.stdout)
     except Exception as e:
         print(f"Error with SUBFINDER: {e}")
 
@@ -171,7 +180,8 @@ def run_ffuf(t, w):
             ["ffuf", "-u", f"{t}FUZZ", "-w", w, "-mc", "200", "-t", "50"],
             text=True, capture_output=True
         )
-        print("\n%%%%%%%%%%%%%%%%%%%%%%%%FFUF RESULTS%%%%%%%%%%%%%%%%%%%%%%%%%%%\n" + result.stdout)
+        func_name = "FFUF"
+        print(f"{identifier(func_name)}" + result.stdout)
     except Exception as e:
         print(f"Error with ffuf: {e}")
 
@@ -181,7 +191,8 @@ def run_nmap_advanced(t):
     print(f"\n[+] Running advanced nmap scan on {t}")
     try:
         result = subprocess.run(["nmap", "-sSVC", "--script", "vuln", t], text=True, capture_output=True)
-        print("\n%%%%%%%%%%%%%%%%%%%%%%%%-A-NMAP RESULTS-%%%%%%%%%%%%%%%%%%%%%%%%%%%\n" + result.stdout)
+        func_name = "NMAP-ADVANCED"
+        print(f"{identifier(func_name)}" + result.stdout)
     except Exception as e:
         print(f"Error with advanced nmap scan: {e}")
 
@@ -191,7 +202,8 @@ def run_nikto_advanced(t):
     print(f"\n[+] Running advanced Nikto scan on {t}")
     try:
         result = subprocess.run(["nikto", "-h", t, "-Tuning", "4"], text=True, capture_output=True)
-        print("\n%%%%%%%%%%%%%%%%%%%%%%%%NIKTO RESULTS%%%%%%%%%%%%%%%%%%%%%%%%%%%\n" + result.stdout)
+        func_name = "NIKTO-ADVANCED"
+        print(f"{identifier(func_name)}" + result.stdout)
     except Exception as e:
         print(f"Error with advanced Nikto scan: {e}")
 
@@ -200,9 +212,15 @@ def run_ssl_scan(t):
     print(f"\n[+] Running ssl-scan on {t}")
     try:
         result = subprocess.run(["sslscan", t], text=True, capture_output=True)
-        print("\n%%%%%%%%%%%%%%%%%%%%%%%%-SSL-SCAN RESULTS-%%%%%%%%%%%%%%%%%%%%%%%%%%%\n" + result.stdout)
+        func_name = "SSL-SCAN"
+        print(f"{identifier(func_name)}" + result.stdout)
     except Exception as e:
         print(f"Error with SSL-SCAN:{e}")
+
+
+def identifier(name):
+    if name:
+        return f"\n%%%%%%%%%%%%%%%%%%%%%%%%-{name} RESULTS-%%%%%%%%%%%%%%%%%%%%%%%%%%%\n"
 
 
 # Level 1: Basic Info Gathering
@@ -240,6 +258,7 @@ def run_level_3(t, ip, d, w):
         executor.submit(run_nmap_advanced, ip)
         executor.submit(run_nikto_advanced, t)
         executor.submit(run_ssl_scan, t)
+        executor.submit(lc.run_crawler, t)
 
 
 # Main logic

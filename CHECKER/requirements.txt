@@ -3,3 +3,4 @@ termcolor==2.3.0
 requests
 dnspython
 argparse
+beautifulsoup4
